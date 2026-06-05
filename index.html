@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Martes kokebok ❤️</title>
+<style>
+  :root {
+    --grønn: #2e7d52; --grønn-lys: #e8f3ed; --grønn-mørk: #1f5938;
+    --bg: #faf9f6; --kort: #ffffff; --tekst: #2b2b2b; --grå: #757570;
+    --kant: #e4e2dc; --rød: #d4543e; --gul: #f0b429;
+    --skygge: 0 1px 4px rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--tekst); line-height: 1.5; }
+
+  header { background: var(--grønn); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; position: sticky; top: 0; z-index: 50; }
+  header h1 { font-size: 1.15rem; font-weight: 700; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav button { background: transparent; border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: .92rem; }
+  nav button.aktiv { background: rgba(255,255,255,.22); font-weight: 600; }
+  nav button .badge { background: var(--gul); color: #3a2c00; border-radius: 10px; padding: 0 7px; font-size: .75rem; margin-left: 5px; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+  .verktøy { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .verktøy input[type=search] { flex: 1 1 220px; padding: 10px 14px; border: 1px solid var(--kant); border-radius: 10px; font-size: 1rem; background: var(--kort); }
+  .verktøy select { padding: 10px 12px; border: 1px solid var(--kant); border-radius: 10px; background: var(--kort); font-size: .92rem; max-width: 200px; }
+
+  .antall { color: var(--grå); font-size: .88rem; margin-bottom: 12px; }
+
+  .rutenett { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .kort { background: var(--kort); border-radius: 14px; overflow: hidden; box-shadow: var(--skygge); cursor: pointer; display: flex; flex-direction: column; transition: transform .12s; }
+  .kort:hover { transform: translateY(-2px); }
+  .kort img { width: 100%; height: 160px; object-fit: cover; background: var(--grønn-lys); }
+  .kort .innhold { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .kort h3 { font-size: 1rem; line-height: 1.3; }
+  .merker { display: flex; gap: 5px; flex-wrap: wrap; }
+  .merke { background: var(--grønn-lys); color: var(--grønn-mørk); font-size: .72rem; padding: 2px 9px; border-radius: 10px; }
+  .merke.kilde { background: #f1efe9; color: var(--grå); }
+  .kort .handlinger { display: flex; gap: 6px; margin-top: auto; align-items: center; }
+  .hjerte { background: none; border: none; font-size: 1.25rem; cursor: pointer; line-height: 1; padding: 4px; }
+  .leggtil { border: 1px solid var(--kant); background: var(--kort); border-radius: 8px; padding: 5px 10px; font-size: .8rem; cursor: pointer; color: var(--grønn-mørk); }
+  .leggtil:hover { background: var(--grønn-lys); }
+
+  /* Modal */
+  .modal-bak { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-start; justify-content: center; padding: 30px 16px; z-index: 100; overflow-y: auto; }
+  .modal-bak.åpen { display: flex; }
+  .modal { background: var(--kort); border-radius: 16px; max-width: 640px; width: 100%; overflow: hidden; }
+  .modal img { width: 100%; max-height: 280px; object-fit: cover; }
+  .modal .kropp { padding: 22px 26px 28px; }
+  .modal h2 { margin-bottom: 4px; font-size: 1.35rem; }
+  .modal .meta { color: var(--grå); font-size: .85rem; margin-bottom: 14px; }
+  .modal h4 { margin: 16px 0 6px; color: var(--grønn-mørk); }
+  .modal ul, .modal ol { padding-left: 22px; display: grid; gap: 4px; }
+  .modal .lukk { float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--grå); }
+  .modal a { color: var(--grønn); }
+
+  /* Ukemeny */
+  .uke { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .dag { background: var(--kort); border-radius: 12px; padding: 14px; box-shadow: var(--skygge); }
+  .dag h3 { font-size: .95rem; color: var(--grønn-mørk); margin-bottom: 8px; }
+  .dag .rett { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: .85rem; padding: 6px 8px; background: var(--grønn-lys); border-radius: 8px; margin-bottom: 6px; }
+  .dag .rett span { cursor: pointer; }
+  .dag .fjern { background: none; border: none; cursor: pointer; color: var(--rød); font-size: .95rem; }
+  .dag .tom { color: var(--grå); font-size: .8rem; font-style: italic; }
+
+  /* Handleliste */
+  .liste { max-width: 560px; }
+  .liste .gruppe { background: var(--kort); border-radius: 12px; padding: 16px 18px; box-shadow: var(--skygge); margin-bottom: 14px; }
+  .liste .gruppe h3 { font-size: .92rem; color: var(--grønn-mørk); margin-bottom: 8px; }
+  .liste label { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; cursor: pointer; font-size: .93rem; }
+  .liste input:checked + span { text-decoration: line-through; color: var(--grå); }
+
+  .tomtilstand { text-align: center; color: var(--grå); padding: 60px 20px; }
+  .knapp { background: var(--grønn); color: #fff; border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; font-size: .92rem; }
+  .knapp.sekundær { background: #efede7; color: var(--tekst); }
+
+  /* Dagvelger-popup */
+  .dagvelger { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 110; }
+  .dagvelger.åpen { display: flex; }
+  .dagvelger .boks { background: var(--kort); border-radius: 14px; padding: 22px; display: grid; gap: 8px; min-width: 240px; }
+  .dagvelger button { padding: 9px; border: 1px solid var(--kant); background: var(--bg); border-radius: 8px; cursor: pointer; }
+  .dagvelger button:hover { background: var(--grønn-lys); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Martes kokebok ❤️</h1>
+  <nav id="nav"></nav>
+</header>
+
+<main id="hoved"></main>
+
+<div class="modal-bak" id="modalBak" onclick="if(event.target===this) lukkModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="dagvelger" id="dagvelger" onclick="if(event.target===this) this.classList.remove('åpen')">
+  <div class="boks" id="dagvelgerBoks"></div>
+</div>
+
+<script src="scraper/oppskrifter.js"></script>
+<script>
+const DAGER = ["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+const KILDENAVN = {"lavfodmap.no":"lavfodmap.no","lyngstadernaering.no":"Lyngstad","fodmapeveryday.com":"FODMAP Everyday","funwithoutfodmaps.com":"Fun Without FODMAPs","magevennligmat.no":"Magevennlig mat"};
+
+let oppskrifter = (window.RECIPES || []).filter(r => r.title);
+let visning = "oppskrifter";
+let søk = "", fKategori = "", fKilde = "", fSpråk = "", bareFav = false;
+
+// localStorage-tilstand
+const lag = (n, d) => { try { return JSON.parse(localStorage.getItem(n)) ?? d; } catch { return d; } };
+let favoritter = new Set(lag("fodmap_favs", []));
+let ukemeny = lag("fodmap_uke", {});           // {Mandag: [id, ...]}
+let avhuket = new Set(lag("fodmap_handlet", []));
+const lagre = () => {
+  localStorage.setItem("fodmap_favs", JSON.stringify([...favoritter]));
+  localStorage.setItem("fodmap_uke", JSON.stringify(ukemeny));
+  localStorage.setItem("fodmap_handlet", JSON.stringify([...avhuket]));
+};
+
+const finn = id => oppskrifter.find(r => r.id === id);
+const esc = s => (s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function antallIUke() { return Object.values(ukemeny).reduce((a, l) => a + l.length, 0); }
+
+// ---------- Navigasjon ----------
+function tegnNav() {
+  const deler = [
+    ["oppskrifter", "Oppskrifter"],
+    ["favoritter", `Favoritter${favoritter.size ? ` <span class="badge">${favoritter.size}</span>` : ""}`],
+    ["ukemeny", `Ukemeny${antallIUke() ? ` <span class="badge">${antallIUke()}</span>` : ""}`],
+    ["handleliste", "Handleliste"],
+  ];
+  document.getElementById("nav").innerHTML = deler.map(([id, navn]) =>
+    `<button class="${visning === id ? "aktiv" : ""}" onclick="bytt('${id}')">${navn}</button>`).join("");
+}
+function bytt(v) { visning = v; tegn(); }
+
+// ---------- Hovedvisning ----------
+function tegn() {
+  tegnNav();
+  const m = document.getElementById("hoved");
+  if (visning === "oppskrifter" || visning === "favoritter") m.innerHTML = visOppskrifter();
+  else if (visning === "ukemeny") m.innerHTML = visUkemeny();
+  else m.innerHTML = visHandleliste();
+}
+
+function visOppskrifter() {
+  const kategorier = [...new Set(oppskrifter.flatMap(r => r.categories))].sort((a,b)=>a.localeCompare(b,"nb"));
+  const kilder = [...new Set(oppskrifter.map(r => r.source))];
+
+  let liste = oppskrifter;
+  if (visning === "favoritter") liste = liste.filter(r => favoritter.has(r.id));
+  if (søk) {
+    const s = søk.toLowerCase();
+    liste = liste.filter(r => r.title.toLowerCase().includes(s) ||
+      r.ingredients.some(i => i.toLowerCase().includes(s)));
+  }
+  if (fKategori) liste = liste.filter(r => r.categories.includes(fKategori));
+  if (fKilde) liste = liste.filter(r => r.source === fKilde);
+  if (fSpråk) liste = liste.filter(r => r.language === fSpråk);
+
+  const kort = liste.map(r => `
+    <div class="kort" onclick="åpneModal('${r.id}')">
+      ${r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : ""}
+      <div class="innhold">
+        <h3>${esc(r.title)}</h3>
+        <div class="merker">
+          ${r.categories.slice(0,3).map(k => `<span class="merke">${esc(k)}</span>`).join("")}
+          <span class="merke kilde">${esc(KILDENAVN[r.source] || r.source)}</span>
+        </div>
+        <div class="handlinger" onclick="event.stopPropagation()">
+          <button class="hjerte" title="Favoritt" onclick="taFav('${r.id}')">${favoritter.has(r.id) ? "❤️" : "🤍"}</button>
+          <button class="leggtil" onclick="velgDag('${r.id}')">+ Ukemeny</button>
+        </div>
+      </div>
+    </div>`).join("");
+
+  return `
+    <div class="verktøy">
+      <input type="search" placeholder="Søk i tittel eller ingredienser …" value="${esc(søk)}"
+             oninput="søk=this.value; oppdaterListe()">
+      <select onchange="fKategori=this.value; oppdaterListe()">
+        <option value="">Alle kategorier</option>
+        ${kategorier.map(k => `<option ${k===fKategori?"selected":""} value="${esc(k)}">${esc(k)}</option>`).join("")}
+      </select>
+      <select onchange="fKilde=this.value; oppdaterListe()">
+        <option value="">Alle kilder</option>
+        ${kilder.map(k => `<option ${k===fKilde?"selected":""} value="${esc(k)}">${esc(KILDENAVN[k]||k)}</option>`).join("")}
+      </select>
+      <select onchange="fSpråk=this.value; oppdaterListe()">
+        <option value="">Alle språk</option>
+        <option value="nb" ${fSpråk==="nb"?"selected":""}>Norsk</option>
+        <option value="en" ${fSpråk==="en"?"selected":""}>Engelsk</option>
+      </select>
+    </div>
+    <div class="antall">${liste.length} oppskrift${liste.length === 1 ? "" : "er"}</div>
+    ${kort ? `<div class="rutenett">${kort}</div>`
+           : `<div class="tomtilstand">${visning === "favoritter" ? "Ingen favoritter ennå – trykk 🤍 på en oppskrift." : "Ingen treff."}</div>`}`;
+}
+
+// Behold scrollposisjon/fokus ved filtrering
+function oppdaterListe() {
+  const aktiv = document.activeElement;
+  const pos = aktiv && aktiv.type === "search" ? aktiv.selectionStart : null;
+  tegn();
+  if (pos !== null) {
+    const felt = document.querySelector('input[type=search]');
+    if (felt) { felt.focus(); felt.setSelectionRange(pos, pos); }
+  }
+}
+
+// ---------- Favoritter / ukemeny ----------
+function taFav(id) {
+  favoritter.has(id) ? favoritter.delete(id) : favoritter.add(id);
+  lagre(); tegn();
+}
+
+function velgDag(id) {
+  const boks = document.getElementById("dagvelgerBoks");
+  boks.innerHTML = `<strong>Legg til på dag:</strong>` + DAGER.map(d =>
+    `<button onclick="leggIUke('${id}','${d}')">${d}${(ukemeny[d]||[]).length ? ` (${ukemeny[d].length})` : ""}</button>`).join("");
+  document.getElementById("dagvelger").classList.add("åpen");
+}
+function leggIUke(id, dag) {
+  (ukemeny[dag] = ukemeny[dag] || []).push(id);
+  document.getElementById("dagvelger").classList.remove("åpen");
+  lagre(); tegn();
+}
+function fjernFraUke(dag, idx) {
+  ukemeny[dag].splice(idx, 1);
+  if (!ukemeny[dag].length) delete ukemeny[dag];
+  lagre(); tegn();
+}
+function tømUke() {
+  if (confirm("Tømme hele ukemenyen?")) { ukemeny = {}; avhuket.clear(); lagre(); tegn(); }
+}
+
+function visUkemeny() {
+  const dager = DAGER.map(d => {
+    const retter = (ukemeny[d] || []).map((id, i) => {
+      const r = finn(id);
+      return r ? `<div class="rett"><span onclick="åpneModal('${id}')">${esc(r.title)}</span>
+        <button class="fjern" title="Fjern" onclick="fjernFraUke('${d}',${i})">✕</button></div>` : "";
+    }).join("");
+    return `<div class="dag"><h3>${d}</h3>${retter || '<div class="tom">Ingen retter</div>'}</div>`;
+  }).join("");
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem;">Ukemeny</h2>
+      ${antallIUke() ? `<div style="display:flex; gap:8px;">
+        <button class="knapp" onclick="bytt('handleliste')">Vis handleliste</button>
+        <button class="knapp sekundær" onclick="tømUke()">Tøm uka</button></div>` : ""}
+    </div>
+    <div class="uke">${dager}</div>
+    ${!antallIUke() ? '<div class="tomtilstand">Legg til retter fra oppskriftslisten med «+ Ukemeny»-knappen.</div>' : ""}`;
+}
+
+// ---------- Handleliste ----------
+function visHandleliste() {
+  const ider = [...new Set(Object.values(ukemeny).flat())];
+  if (!ider.length) return `<div class="tomtilstand">Handlelisten lages fra ukemenyen din.<br><br>
+    <button class="knapp" onclick="bytt('oppskrifter')">Finn oppskrifter</button></div>`;
+
+  const grupper = ider.map(id => {
+    const r = finn(id);
+    if (!r) return "";
+    const rader = r.ingredients.map((ing, i) => {
+      const nøkkel = `${id}|${i}`;
+      return `<label><input type="checkbox" ${avhuket.has(nøkkel) ? "checked" : ""}
+        onchange="hukAv('${nøkkel}', this.checked)"><span>${esc(ing)}</span></label>`;
+    }).join("");
+    const antDager = Object.entries(ukemeny).filter(([,l]) => l.includes(id)).map(([d]) => d).join(", ");
+    return `<div class="gruppe"><h3>${esc(r.title)} <small style="color:var(--grå); font-weight:400;">(${antDager})</small></h3>${rader}</div>`;
+  }).join("");
+
+  return `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem;">Handleliste</h2>
+      <button class="knapp sekundær" onclick="avhuket.clear(); lagre(); tegn()">Nullstill avhuking</button>
+    </div><div class="liste">${grupper}</div>`;
+}
+function hukAv(nøkkel, på) { på ? avhuket.add(nøkkel) : avhuket.delete(nøkkel); lagre(); }
+
+// ---------- Modal ----------
+function åpneModal(id) {
+  const r = finn(id);
+  if (!r) return;
+  document.getElementById("modal").innerHTML = `
+    ${r.image ? `<img src="${esc(r.image)}" alt="" onerror="this.style.display='none'">` : ""}
+    <div class="kropp">
+      <button class="lukk" onclick="lukkModal()">✕</button>
+      <h2>${esc(r.title)}</h2>
+      <div class="meta">
+        ${esc(KILDENAVN[r.source] || r.source)}${r.servings ? " · " + esc(r.servings) : ""}
+        · <a href="${esc(r.url)}" target="_blank" rel="noopener">Se original ↗</a>
+      </div>
+      <div class="merker">${r.categories.map(k => `<span class="merke">${esc(k)}</span>`).join("")}</div>
+      ${r.description ? `<p style="margin-top:12px; color:var(--grå);">${esc(r.description)}</p>` : ""}
+      <h4>Ingredienser</h4>
+      <ul>${r.ingredients.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+      <h4>Fremgangsmåte</h4>
+      <ol>${r.instructions.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+      <div style="margin-top:18px; display:flex; gap:10px;">
+        <button class="knapp sekundær" onclick="taFav('${r.id}'); åpneModal('${r.id}')">${favoritter.has(r.id) ? "❤️ Favoritt" : "🤍 Lagre som favoritt"}</button>
+        <button class="knapp" onclick="lukkModal(); velgDag('${r.id}')">+ Legg i ukemeny</button>
+      </div>
+    </div>`;
+  document.getElementById("modalBak").classList.add("åpen");
+}
+function lukkModal() { document.getElementById("modalBak").classList.remove("åpen"); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") { lukkModal(); document.getElementById("dagvelger").classList.remove("åpen"); } });
+
+// ---------- Start ----------
+if (!oppskrifter.length) {
+  document.getElementById("hoved").innerHTML = `<div class="tomtilstand">
+    Fant ingen oppskrifter. Kjør scriptet først:<br><br>
+    <code>cd scraper && python3 scrape_fodmap.py</code></div>`;
+  tegnNav();
+} else {
+  tegn();
+}
+</script>
+</body>
+</html>
